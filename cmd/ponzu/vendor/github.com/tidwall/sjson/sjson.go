@@ -36,6 +36,7 @@ type Options struct {
 
 type pathResult struct {
 	part  string // current key part
+	gpart string // gjson get part
 	path  string // remaining path
 	force bool   // force a string key
 	more  bool   // there is more path to parse
@@ -50,6 +51,7 @@ func parsePath(path string) (pathResult, error) {
 	for i := 0; i < len(path); i++ {
 		if path[i] == '.' {
 			r.part = path[:i]
+			r.gpart = path[:i]
 			r.path = path[i+1:]
 			r.more = true
 			return r, nil
@@ -63,19 +65,24 @@ func parsePath(path string) (pathResult, error) {
 			// go into escape mode. this is a slower path that
 			// strips off the escape character from the part.
 			epart := []byte(path[:i])
+			gpart := []byte(path[:i+1])
 			i++
 			if i < len(path) {
 				epart = append(epart, path[i])
+				gpart = append(gpart, path[i])
 				i++
 				for ; i < len(path); i++ {
 					if path[i] == '\\' {
+						gpart = append(gpart, '\\')
 						i++
 						if i < len(path) {
 							epart = append(epart, path[i])
+							gpart = append(gpart, path[i])
 						}
 						continue
 					} else if path[i] == '.' {
 						r.part = string(epart)
+						r.gpart = string(gpart)
 						r.path = path[i+1:]
 						r.more = true
 						return r, nil
@@ -87,20 +94,23 @@ func parsePath(path string) (pathResult, error) {
 							"array access character not allowed in path"}
 					}
 					epart = append(epart, path[i])
+					gpart = append(gpart, path[i])
 				}
 			}
 			// append the last part
 			r.part = string(epart)
+			r.gpart = string(gpart)
 			return r, nil
 		}
 	}
 	r.part = path
+	r.gpart = path
 	return r, nil
 }
 
 func mustMarshalString(s string) bool {
 	for i := 0; i < len(s); i++ {
-		if s[i] < ' ' || s[i] > 0x7f || s[i] == '"' {
+		if s[i] < ' ' || s[i] > 0x7f || s[i] == '"' || s[i] == '\\' {
 			return true
 		}
 	}
@@ -208,7 +218,7 @@ loop:
 					for ; i >= 0; i-- {
 						if buf[i] == '"' {
 							i--
-							if i >= 0 && i == '\\' {
+							if i >= 0 && buf[i] == '\\' {
 								i--
 								continue
 							}
@@ -249,7 +259,7 @@ func appendRawPaths(buf []byte, jstr string, paths []pathResult, raw string,
 		}
 	}
 	if !found {
-		res = gjson.Get(jstr, paths[0].part)
+		res = gjson.Get(jstr, paths[0].gpart)
 	}
 	if res.Index > 0 {
 		if len(paths) > 1 {
@@ -331,12 +341,18 @@ func appendRawPaths(buf []byte, jstr string, paths []pathResult, raw string,
 	default:
 		return nil, &errorType{"json must be an object or array"}
 	case '{':
-		buf = append(buf, '{')
-		buf = appendBuild(buf, false, paths, raw, stringify)
+		end := len(jsres.Raw) - 1
+		for ; end > 0; end-- {
+			if jsres.Raw[end] == '}' {
+				break
+			}
+		}
+		buf = append(buf, jsres.Raw[:end]...)
 		if comma {
 			buf = append(buf, ',')
 		}
-		buf = append(buf, jsres.Raw[1:]...)
+		buf = appendBuild(buf, false, paths, raw, stringify)
+		buf = append(buf, '}')
 		return buf, nil
 	case '[':
 		var appendit bool
@@ -398,6 +414,79 @@ func isOptimisticPath(path string) bool {
 		}
 	}
 	return true
+}
+
+// Set sets a json value for the specified path.
+// A path is in dot syntax, such as "name.last" or "age".
+// This function expects that the json is well-formed, and does not validate.
+// Invalid json will not panic, but it may return back unexpected results.
+// An error is returned if the path is not valid.
+//
+// A path is a series of keys separated by a dot.
+//
+//  {
+//    "name": {"first": "Tom", "last": "Anderson"},
+//    "age":37,
+//    "children": ["Sara","Alex","Jack"],
+//    "friends": [
+//      {"first": "James", "last": "Murphy"},
+//      {"first": "Roger", "last": "Craig"}
+//    ]
+//  }
+//  "name.last"          >> "Anderson"
+//  "age"                >> 37
+//  "children.1"         >> "Alex"
+//
+func Set(json, path string, value interface{}) (string, error) {
+	return SetOptions(json, path, value, nil)
+}
+
+// SetBytes sets a json value for the specified path.
+// If working with bytes, this method preferred over
+// Set(string(data), path, value)
+func SetBytes(json []byte, path string, value interface{}) ([]byte, error) {
+	return SetBytesOptions(json, path, value, nil)
+}
+
+// SetRaw sets a raw json value for the specified path.
+// This function works the same as Set except that the value is set as a
+// raw block of json. This allows for setting premarshalled json objects.
+func SetRaw(json, path, value string) (string, error) {
+	return SetRawOptions(json, path, value, nil)
+}
+
+// SetRawOptions sets a raw json value for the specified path with options.
+// This furnction works the same as SetOptions except that the value is set
+// as a raw block of json. This allows for setting premarshalled json objects.
+func SetRawOptions(json, path, value string, opts *Options) (string, error) {
+	var optimistic bool
+	if opts != nil {
+		optimistic = opts.Optimistic
+	}
+	res, err := set(json, path, value, false, false, optimistic, false)
+	if err == errNoChange {
+		return json, nil
+	}
+	return string(res), err
+}
+
+// SetRawBytes sets a raw json value for the specified path.
+// If working with bytes, this method preferred over
+// SetRaw(string(data), path, value)
+func SetRawBytes(json []byte, path string, value []byte) ([]byte, error) {
+	return SetRawBytesOptions(json, path, value, nil)
+}
+
+type dtype struct{}
+
+// Delete deletes a value from json for the specified path.
+func Delete(json, path string) (string, error) {
+	return Set(json, path, dtype{})
+}
+
+// DeleteBytes deletes a value from json for the specified path.
+func DeleteBytes(json []byte, path string) ([]byte, error) {
+	return SetBytes(json, path, dtype{})
 }
 
 func set(jstr, path, raw string,
@@ -466,31 +555,6 @@ func set(jstr, path, raw string,
 	return njson, nil
 }
 
-// Set sets a json value for the specified path.
-// A path is in dot syntax, such as "name.last" or "age".
-// This function expects that the json is well-formed, and does not validate.
-// Invalid json will not panic, but it may return back unexpected results.
-// An error is returned if the path is not valid.
-//
-// A path is a series of keys separated by a dot.
-//
-//  {
-//    "name": {"first": "Tom", "last": "Anderson"},
-//    "age":37,
-//    "children": ["Sara","Alex","Jack"],
-//    "friends": [
-//      {"first": "James", "last": "Murphy"},
-//      {"first": "Roger", "last": "Craig"}
-//    ]
-//  }
-//  "name.last"          >> "Anderson"
-//  "age"                >> 37
-//  "children.1"         >> "Alex"
-//
-func Set(json, path string, value interface{}) (string, error) {
-	return SetOptions(json, path, value, nil)
-}
-
 // SetOptions sets a json value for the specified path with options.
 // A path is in dot syntax, such as "name.last" or "age".
 // This function expects that the json is well-formed, and does not validate.
@@ -514,13 +578,6 @@ func SetOptions(json, path string, value interface{},
 	return string(res), err
 }
 
-// SetBytes sets a json value for the specified path.
-// If working with bytes, this method preferred over
-// Set(string(data), path, value)
-func SetBytes(json []byte, path string, value interface{}) ([]byte, error) {
-	return SetBytesOptions(json, path, value, nil)
-}
-
 // SetBytesOptions sets a json value for the specified path with options.
 // If working with bytes, this method preferred over
 // SetOptions(string(data), path, value)
@@ -536,9 +593,9 @@ func SetBytesOptions(json []byte, path string, value interface{},
 	var err error
 	switch v := value.(type) {
 	default:
-		b, err := jsongo.Marshal(value)
-		if err != nil {
-			return nil, err
+		b, merr := jsongo.Marshal(value)
+		if merr != nil {
+			return nil, merr
 		}
 		raw := *(*string)(unsafe.Pointer(&b))
 		res, err = set(jstr, path, raw, false, false, optimistic, inplace)
@@ -592,35 +649,6 @@ func SetBytesOptions(json []byte, path string, value interface{},
 	return res, err
 }
 
-// SetRaw sets a raw json value for the specified path.
-// This function works the same as Set except that the value is set as a
-// raw block of json. This allows for setting premarshalled json objects.
-func SetRaw(json, path, value string) (string, error) {
-	return SetRawOptions(json, path, value, nil)
-}
-
-// SetRawOptions sets a raw json value for the specified path with options.
-// This furnction works the same as SetOptions except that the value is set
-// as a raw block of json. This allows for setting premarshalled json objects.
-func SetRawOptions(json, path, value string, opts *Options) (string, error) {
-	var optimistic bool
-	if opts != nil {
-		optimistic = opts.Optimistic
-	}
-	res, err := set(json, path, value, false, false, optimistic, false)
-	if err == errNoChange {
-		return json, nil
-	}
-	return string(res), err
-}
-
-// SetRawBytes sets a raw json value for the specified path.
-// If working with bytes, this method preferred over
-// SetRaw(string(data), path, value)
-func SetRawBytes(json []byte, path string, value []byte) ([]byte, error) {
-	return SetRawBytesOptions(json, path, value, nil)
-}
-
 // SetRawBytesOptions sets a raw json value for the specified path with options.
 // If working with bytes, this method preferred over
 // SetRawOptions(string(data), path, value, opts)
@@ -638,16 +666,4 @@ func SetRawBytesOptions(json []byte, path string, value []byte,
 		return json, nil
 	}
 	return res, err
-}
-
-type dtype struct{}
-
-// Delete deletes a value from json for the specified path.
-func Delete(json, path string) (string, error) {
-	return Set(json, path, dtype{})
-}
-
-// DeleteBytes deletes a value from json for the specified path.
-func DeleteBytes(json []byte, path string) ([]byte, error) {
-	return SetBytes(json, path, dtype{})
 }

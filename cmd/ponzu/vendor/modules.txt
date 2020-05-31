@@ -1,0 +1,140 @@
+# github.com/RoaringBitmap/roaring v0.4.21
+github.com/RoaringBitmap/roaring
+# github.com/blevesearch/bleve v1.0.9
+## explicit
+github.com/blevesearch/bleve
+github.com/blevesearch/bleve/analysis
+github.com/blevesearch/bleve/analysis/analyzer/standard
+github.com/blevesearch/bleve/analysis/datetime/flexible
+github.com/blevesearch/bleve/analysis/datetime/optional
+github.com/blevesearch/bleve/analysis/lang/en
+github.com/blevesearch/bleve/analysis/token/lowercase
+github.com/blevesearch/bleve/analysis/token/porter
+github.com/blevesearch/bleve/analysis/token/stop
+github.com/blevesearch/bleve/analysis/tokenizer/unicode
+github.com/blevesearch/bleve/document
+github.com/blevesearch/bleve/geo
+github.com/blevesearch/bleve/index
+github.com/blevesearch/bleve/index/scorch
+github.com/blevesearch/bleve/index/scorch/mergeplan
+github.com/blevesearch/bleve/index/scorch/segment
+github.com/blevesearch/bleve/index/store
+github.com/blevesearch/bleve/index/store/boltdb
+github.com/blevesearch/bleve/index/store/gtreap
+github.com/blevesearch/bleve/index/upsidedown
+github.com/blevesearch/bleve/mapping
+github.com/blevesearch/bleve/numeric
+github.com/blevesearch/bleve/registry
+github.com/blevesearch/bleve/search
+github.com/blevesearch/bleve/search/collector
+github.com/blevesearch/bleve/search/facet
+github.com/blevesearch/bleve/search/highlight
+github.com/blevesearch/bleve/search/highlight/format/html
+github.com/blevesearch/bleve/search/highlight/fragmenter/simple
+github.com/blevesearch/bleve/search/highlight/highlighter/html
+github.com/blevesearch/bleve/search/highlight/highlighter/simple
+github.com/blevesearch/bleve/search/query
+github.com/blevesearch/bleve/search/scorer
+github.com/blevesearch/bleve/search/searcher
+github.com/blevesearch/bleve/size
+# github.com/blevesearch/go-porterstemmer v1.0.3
+github.com/blevesearch/go-porterstemmer
+# github.com/blevesearch/mmap-go v1.0.2
+github.com/blevesearch/mmap-go
+# github.com/blevesearch/segment v0.9.0
+github.com/blevesearch/segment
+# github.com/blevesearch/snowballstem v0.9.0
+github.com/blevesearch/snowballstem
+github.com/blevesearch/snowballstem/english
+# github.com/blevesearch/zap/v11 v11.0.9
+github.com/blevesearch/zap/v11
+# github.com/blevesearch/zap/v12 v12.0.9
+github.com/blevesearch/zap/v12
+# github.com/blevesearch/zap/v13 v13.0.1
+github.com/blevesearch/zap/v13
+# github.com/blevesearch/zap/v14 v14.0.0
+github.com/blevesearch/zap/v14
+# github.com/boltdb/bolt v1.3.1
+## explicit
+github.com/boltdb/bolt
+# github.com/couchbase/vellum v1.0.1
+github.com/couchbase/vellum
+github.com/couchbase/vellum/levenshtein
+github.com/couchbase/vellum/regexp
+github.com/couchbase/vellum/utf8
+# github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2
+github.com/glycerine/go-unsnap-stream
+# github.com/gofrs/uuid v3.3.0+incompatible
+## explicit
+github.com/gofrs/uuid
+# github.com/golang/protobuf v1.3.2
+github.com/golang/protobuf/proto
+# github.com/golang/snappy v0.0.1
+github.com/golang/snappy
+# github.com/gorilla/schema v1.1.0
+## explicit
+github.com/gorilla/schema
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/mschoch/smat v0.2.0
+github.com/mschoch/smat
+# github.com/nilslice/email v0.1.0
+## explicit
+github.com/nilslice/email
+# github.com/nilslice/jwt v1.0.0
+## explicit
+github.com/nilslice/jwt
+# github.com/philhofer/fwd v1.0.0
+github.com/philhofer/fwd
+# github.com/ponzu-cms/ponzu v0.11.0
+## explicit
+github.com/ponzu-cms/ponzu/content
+github.com/ponzu-cms/ponzu/management/editor
+github.com/ponzu-cms/ponzu/management/format
+github.com/ponzu-cms/ponzu/management/manager
+github.com/ponzu-cms/ponzu/system
+github.com/ponzu-cms/ponzu/system/addon
+github.com/ponzu-cms/ponzu/system/admin
+github.com/ponzu-cms/ponzu/system/admin/config
+github.com/ponzu-cms/ponzu/system/admin/upload
+github.com/ponzu-cms/ponzu/system/admin/user
+github.com/ponzu-cms/ponzu/system/api
+github.com/ponzu-cms/ponzu/system/api/analytics
+github.com/ponzu-cms/ponzu/system/backup
+github.com/ponzu-cms/ponzu/system/db
+github.com/ponzu-cms/ponzu/system/item
+github.com/ponzu-cms/ponzu/system/search
+github.com/ponzu-cms/ponzu/system/tls
+# github.com/spf13/cobra v1.0.0
+## explicit
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# github.com/steveyen/gtreap v0.1.0
+github.com/steveyen/gtreap
+# github.com/tidwall/gjson v1.6.0
+github.com/tidwall/gjson
+# github.com/tidwall/match v1.0.1
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.0.1
+github.com/tidwall/pretty
+# github.com/tidwall/sjson v1.1.1
+## explicit
+github.com/tidwall/sjson
+# github.com/tinylib/msgp v1.1.0
+github.com/tinylib/msgp/msgp
+# github.com/willf/bitset v1.1.10
+github.com/willf/bitset
+# go.etcd.io/bbolt v1.3.4
+go.etcd.io/bbolt
+# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/crypto/acme
+golang.org/x/crypto/acme/autocert
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
+# golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.0
+golang.org/x/text/transform
+golang.org/x/text/unicode/norm
