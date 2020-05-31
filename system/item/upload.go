@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ponzu-cms/ponzu/management/editor"
+	"github.com/dmitridb/ponzu/management/editor"
 )
 
 // FileUpload represents the file uploaded to the system
